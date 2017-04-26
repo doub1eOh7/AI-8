@@ -1,4 +1,5 @@
 import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.Comparator;
 
 // This Neural agent was created by Brent Bell
@@ -9,6 +10,7 @@ class BellBrent implements IAgent
 	float xPreset, yPreset;
 	Sprite[] sprites = new Sprite[3];
 	static State[][] terrainMap;
+	static int [][] prevLocOfOpponents;
 	
 	BellBrent() {
 		reset();
@@ -75,6 +77,10 @@ class BellBrent implements IAgent
 		
 		public float xPosition;
 		public float yPosition;
+		public float newX;
+		public float newY;
+		public static float [] prevXOpp = new float[3];
+		public static float [] prevYOpp = new float[3];
 		
 		public Sprite(int i, float xPosition, float yPosition) {
 			index = i;
@@ -94,9 +100,10 @@ class BellBrent implements IAgent
 			//Shoot the flag if you can
 			shootTheFlag();
 			//Don't let enemies get too close (can come within 90% of throwing distance)
-			avoidEnemies();
+			//avoidEnemies();
 			//And always avoid bombs
-			avoidBombs();
+			if(avoidEnemies() || avoidBombs())
+				move(newX, newY);
 		}
 		
 		private boolean avoidEnemies() {
@@ -106,7 +113,8 @@ class BellBrent implements IAgent
 				float dy = y() - model.getYOpponent(nearestEnemy.index);
 				if(dx == 0 && dy == 0)
 					dx = 1.0f;
-				move(x() + dx * 10.0f, y() + dy * 10.0f);
+				newX = x() + dx * 10.0f;
+				newY  = y() + dy * 10.0f;
 				return true;
 			}
 			return false;
@@ -137,7 +145,8 @@ class BellBrent implements IAgent
 				float dy = y() - model.getBombTargetY(nearestBomb.index);
 				if(dx == 0 && dy == 0)
 					dx = 1.0f;
-				move(x() + dx * 10.0f, y() + dy * 10.0f);
+				newX = x() + dx * 10.0f;
+				newY  = y() + dy * 10.0f;
 				return true;
 			}
 			return false;
@@ -158,7 +167,7 @@ class BellBrent implements IAgent
 			return nearestBomb;
 		}
 		
-		//Uses UCS to find an optimal path
+		//Uses A* to find an optimal path
 		private void moveToPosition(float x, float y) {
 			State[][] costMap = AStar.search(
 					terrainMap, 
@@ -188,7 +197,15 @@ class BellBrent implements IAgent
 		private void shootEnemy(Enemy enemy) {
 			//Center the shot on the enemy if I can
 			if (enemy.distance <= Model.MAX_THROW_RADIUS * Model.MAX_THROW_RADIUS) {
-				shoot(model.getXOpponent(enemy.index), model.getYOpponent(enemy.index));
+				float curX = model.getXOpponent(enemy.index);
+				float curY = model.getYOpponent(enemy.index);
+				if(prevXOpp[enemy.index] != 0)
+				{
+					shoot(4*curX - 3*prevXOpp[enemy.index], 4*curY - 3*prevYOpp[enemy.index]);
+					//System.out.println(curX+":"+prevXOpp[enemy.index]+","+curY+":"+prevYOpp[enemy.index]);
+				}
+				else
+					shoot(curX, curY);
 
 			//Otherwise try to get them in the blast radius anyhow
 			}else if (Math.sqrt(enemy.distance) < Model.MAX_THROW_RADIUS + (Model.BLAST_RADIUS * 0.25 ) ) {
@@ -199,6 +216,13 @@ class BellBrent implements IAgent
 				float throwY = dy * scale + y();
 				shoot(throwX, throwY);
 			}
+			Random r = new Random();
+			if(r.nextDouble() < 0.5)
+			{
+				prevXOpp[enemy.index] = model.getXOpponent(enemy.index);
+				prevYOpp[enemy.index] = model.getYOpponent(enemy.index);
+			}
+				
 		}
 		
 		public float x() {
@@ -266,11 +290,15 @@ class BellBrent implements IAgent
 			int maxX = states.length - 1;
 			int maxY = states[0].length - 1;
 			
-			State[] adjacentList = new State[4];
+			State[] adjacentList = new State[8];
 			adjacentList[0] = (x + 1 <= maxX) ? states[x + 1][y] : null;
 			adjacentList[1] = (x - 1 >= 0) ? states[x - 1][y] : null;
 			adjacentList[2] = (y + 1 <= maxY) ? states[x][y + 1] : null;
 			adjacentList[3] = (y - 1 >= 0) ? states[x][y - 1] : null;
+			adjacentList[4] = ((x + 1 <= maxX) && (y + 1 <= maxY)) ? states[x + 1][y + 1] : null;
+			adjacentList[5] = ((x - 1 >= 0) && (y + 1 <= maxY)) ? states[x - 1][y + 1] : null;
+			adjacentList[6] = ((x - 1 >= 0) && (y - 1 >= 0)) ? states[x - 1][y - 1] : null;
+			adjacentList[7] = ((x + 1 <= maxX) && (y - 1 >= 0)) ? states[x + 1][y - 1] : null;
 
 			return adjacentList;
 		}
@@ -330,7 +358,7 @@ class BellBrent implements IAgent
 				//Iterate through next states
 				for(State next : here.getMoves(map))
 				{
-					if(next == null) break;
+					if(next == null) continue;
 					//If visited already Re-parent if better
 					if(visited[next.x][next.y])
 					{
@@ -348,9 +376,9 @@ class BellBrent implements IAgent
 						queue.add(next);
 					}
 				}
-			}	
-			throw new RuntimeException("There is no path to the goal. Dest: " + Model.XMAX + ": "+ dest.x + ", " + Model.YMAX + ": "+ dest.y);
-			//return null;
+			}
+			//throw new RuntimeException("There is no path to the goal. Dest: " + Model.XMAX + ": "+ dest.x + ", " + Model.YMAX + ": "+ dest.y);
+			return null;
 		}
 	}
 }

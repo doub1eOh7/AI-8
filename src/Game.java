@@ -13,6 +13,7 @@ class Game {
 		al.add(new Winner2015a());
 		al.add(new Winner2015b());
 		al.add(new Winner2016a());
+		al.add(new BellBrent());
 
 		Controller.doTournament(al);
 	}
@@ -25,9 +26,9 @@ class Game {
 		//Controller.doBattle(new Human(), new SittingDuck());
 		//Controller.doBattle(new Mixed(), new SittingDuck());
 		//Controller.doBattle(new Human(), new Blitz());
-		//Controller.doBattle(new PrescientMoron(), new SittingDuck());
+		Controller.doBattle(new BellBrent(), new SittingDuck());
 		//Controller.doBattle(new PrescientMoron(), new Human());
-		//Controller.doBattle(new Human(), new PrescientMoron());
-		fullTournament();
+		//Controller.doBattle(new BellBrent(), new PrescientMoron());
+		//fullTournament();
 	}
 }

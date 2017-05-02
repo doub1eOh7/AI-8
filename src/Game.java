@@ -26,7 +26,7 @@ class Game {
 		//Controller.doBattle(new Human(), new SittingDuck());
 		//Controller.doBattle(new Mixed(), new SittingDuck());
 		//Controller.doBattle(new Human(), new Blitz());
-		Controller.doBattle(new BellBrent(), new SittingDuck());
+		Controller.doBattle(new BellBrent3(), new SittingDuck());
 		//Controller.doBattle(new PrescientMoron(), new Human());
 		//Controller.doBattle(new BellBrent(), new PrescientMoron());
 		//fullTournament();

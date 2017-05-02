@@ -2,7 +2,7 @@ import java.util.PriorityQueue;
 import java.util.Comparator;
 
 // This Neural agent was created by Brent Bell
-// It implements A* Search and
+// It implements A* Search (line 290) and a Neural Network
 class BellBrent implements IAgent
 {
 	static int iter;
@@ -330,7 +330,7 @@ class BellBrent implements IAgent
 				//Iterate through next states
 				for(State next : here.getMoves(map))
 				{
-					if(next == null) break;
+					if(next == null) continue;
 					//If visited already Re-parent if better
 					if(visited[next.x][next.y])
 					{
@@ -349,8 +349,8 @@ class BellBrent implements IAgent
 					}
 				}
 			}	
-			throw new RuntimeException("There is no path to the goal. Dest: " + Model.XMAX + ": "+ dest.x + ", " + Model.YMAX + ": "+ dest.y);
-			//return null;
+			//throw new RuntimeException("There is no path to the goal. Dest: " + Model.XMAX + ": "+ dest.x + ", " + Model.YMAX + ": "+ dest.y);
+			return null;
 		}
 	}
 }

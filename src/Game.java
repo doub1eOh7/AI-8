@@ -973,10 +973,10 @@ class Game {
 		//Controller.doBattle(new PrescientMoron(), new Human());
 		//Controller.doBattle(new BellBrent(), new PrescientMoron());
 		//fullTournament();
-		double[] w = evolveWeights();
-		System.out.println(w);
-		//Controller.doBattle(new BellBrent2(w), new Winner2016a());
-		fullTournament(w);
+		//double[] w = evolveWeights();
+		//System.out.println(w);
+		Controller.doBattle(new BellBrent2(), new Winner2016a());
+		//fullTournament(w);
 
 	}
 }
